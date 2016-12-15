@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+</head>
+<style>
+    video#V1 {
+        position: fixed;
+        right: 0;
+        bottom: 0;
+        min-width: 100%;
+        min-height: 100%;
+        width: auto;
+        height: auto;
+        background-size: cover;
+    }
+</style>
+
+<body>
+    <video id="V1" controls loop>
+	<source src="videos/a.mp4" type="video/mp4" />
+	<source src="videos/evolution.webm" type="video/webm" />
+  </video>
+</body>
+
+</html>
+
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+
+<script>
+    var socket = io();
+    var video = document.getElementById("V1");
+    video.preload = true;
+
+    socket.on('pause', function(data) {
+        video.currentTime = data.curTime;
+        video.pause();
+    });
+
+    socket.on('volumechange', function(data) {
+        video.volume = data.vidVolume;
+    });
+
+    socket.on('START', function(data) {
+        toggleFullscreen('V1');
+        video.currentTime = data.curTime;
+        video.play();
+    });
+
+  
+    video.addEventListener('pause', function() {
+        video.pause();
+        socket.emit('pause', {
+            curTime: video.currentTime
+        });
+    }, true)
+
+    document.getElementById('V1').addEventListener('click', function() {
+        toggleFullscreen(this);
+    });
+
+    // video.addEventListener('play', function() {
+    //     //video.play();
+    //     socket.emit('play', {
+    //         curTime: video.currentTime
+    //     });
+    // }, true)
+
+    video.addEventListener('START', function() {
+        //video.play();
+        socket.emit('START', {
+            curTime: video.currentTime
+        });
+    }, true)
+
+    function toggleFullscreen(elem) {
+        elem = elem || document.documentElement;
+        if (!document.fullscreenElement && !document.mozFullScreenElement &&
+            !document.webkitFullscreenElement && !document.msFullscreenElement) {
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen();
+            } else if (elem.msRequestFullscreen) {
+                elem.msRequestFullscreen();
+            } else if (elem.mozRequestFullScreen) {
+                elem.mozRequestFullScreen();
+            } else if (elem.webkitRequestFullscreen) {
+                elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            }
+        } else {
+            // if (document.exitFullscreen) {
+            //   document.exitFullscreen();
+            // } else if (document.msExitFullscreen) {
+            //   document.msExitFullscreen();
+            // } else if (document.mozCancelFullScreen) {
+            //   document.mozCancelFullScreen();
+            // } else if (document.webkitExitFullscreen) {
+            //   document.webkitExitFullscreen();
+            // }
+        }
+        if (elem.paused)
+          elem.play();
+    }
+</script>

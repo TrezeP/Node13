@@ -1,0 +1,50 @@
+<script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+<style>
+video#V1 { 
+position: fixed; right: 0; bottom: 0;
+min-width: 100%; min-height: 100%;
+width: auto; height: auto; z-index: -100;
+background: url(polina.jpg) no-repeat;
+background-size: cover; 
+}
+</style>
+
+<div id="room" class="inactive">    
+  <p><video  id="V1" src="./client/a.webm" controls></video></p>
+</div>
+
+<script>
+	var socket = io();
+	var video = document.getElementById("V1");
+	video.preload = true;
+	
+	socket.on('pause',function(data){
+		video.currentTime = data.curTime;
+		video.pause();
+	});
+	
+	socket.on('volumechange',function(data){
+		video.volume = data.vidVolume;		
+	});
+	
+	socket.on('play',function(data){	
+		video.requestFullscreen();
+		video.currentTime = data.curTime;
+		video.play();
+	});
+	
+	video.addEventListener('pause', function(){
+		 video.pause();
+		  socket.emit('pause', {curTime: video.currentTime});
+	}, true)
+	
+	video.addEventListener('play', function(){
+		 video.play();
+		  socket.emit('play', {curTime: video.currentTime});
+	}, true)	
+	
+	
+	
+</script>
